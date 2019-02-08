@@ -4,4 +4,5 @@ object Versions {
   val doobie = "0.7.0-M2"
   val frees = "0.8.2"
   val log4cats = "0.3.0-M2"
+  val pureconfig = "0.10.2"
 }

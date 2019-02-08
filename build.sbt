@@ -24,7 +24,8 @@ libraryDependencies ++= Seq(
   "io.frees" %% "frees-http4s" % Versions.frees,
   "io.frees" %% "frees-logging" % Versions.frees,
   "io.chrisdavenport" %% "log4cats-core" % Versions.log4cats,
-  "io.chrisdavenport" %% "log4cats-slf4j" % Versions.log4cats
+  "io.chrisdavenport" %% "log4cats-slf4j" % Versions.log4cats,
+  "com.github.pureconfig" %% "pureconfig" % Versions.pureconfig
 )
 
 
@@ -33,3 +34,8 @@ addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.8")
 
 // if your project uses multiple Scala versions, use this for cross building
 addCompilerPlugin("org.spire-math" % "kind-projector" % "0.9.8" cross CrossVersion.binary)
+
+enablePlugins(JavaServerAppPackaging)
+enablePlugins(GraalVMNativeImagePlugin)
+
+graalVMNativeImageOptions ++= Seq("-da")
