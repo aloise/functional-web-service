@@ -1,4 +1,4 @@
-name := "functional-wer-service"
+name := "functional-web-service"
 
 version := "1.0"
 
@@ -11,4 +11,11 @@ scalacOptions ++= Seq(
   "-Ypartial-unification"
 )
 
-libraryDependencies ++= Seq()
+libraryDependencies ++= Seq(
+  "org.http4s" %% "http4s-blaze-server" % Versions.http4s,
+  "org.http4s" %% "http4s-dsl" % Versions.http4s,
+  "org.http4s" %% "http4s-circe" % Versions.http4s,
+  "io.circe" %% "circe-generic" % Versions.circe,
+  "org.tpolecat" %% "doobie-core" % Versions.doobie,
+  "org.tpolecat" %% "doobie-hikari" % Versions.doobie
+)
