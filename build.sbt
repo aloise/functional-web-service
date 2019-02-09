@@ -33,8 +33,6 @@ libraryDependencies ++= Seq(
   "io.github.jmcardon" %% "tsec-cipher-bouncy" % Versions.tsecV,
 )
 
-
-
 addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.8")
 
 // if your project uses multiple Scala versions, use this for cross building
@@ -48,6 +46,7 @@ graalVMNativeImageOptions ++= Seq("-da")
 lazy val root = (project in file("."))
   .enablePlugins(BuildInfoPlugin)
   .settings(
-    buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
+    buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion, "revision" -> scala.sys.process.Process("git rev-parse HEAD").!!.trim),
     buildInfoPackage := "name.aloise.build"
   )
+

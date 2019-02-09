@@ -7,9 +7,11 @@ import name.aloise.utils.Logging
 import org.http4s._
 import org.http4s.dsl.io._
 import org.http4s.server.Router
+
 import scala.concurrent.ExecutionContext
 import cats.effect._
 import io.circe._
+import name.aloise.service.HealthService
 import org.http4s._
 import org.http4s.dsl.io._
 
@@ -23,11 +25,6 @@ object AppServer extends IOApp with Logging[IO] {
       Ok(s"Hello, ${name*19000}.")
   }
 
-  private val healthService = HttpRoutes.of[IO] {
-    case GET -> Root =>
-      Ok("Healthy Wealthy")
-  }
-
   private def faviconService(blockingEc: ExecutionContext) = HttpRoutes.of[IO] {
     case req @ GET -> Root / "favicon.ico" =>
       StaticFile.fromResource("/favicon/favicon-32x32.png", blockingEc, Some(req)).getOrElseF(NotFound())
@@ -35,7 +32,7 @@ object AppServer extends IOApp with Logging[IO] {
 
   def routes(blockingEc: ExecutionContext): HttpRoutes[IO] = Router[IO](
     "/hello" -> helloWorldService,
-    "/health" -> healthService,
+    "/health" -> HealthService[IO]().routes,
     "/" -> faviconService(blockingEc)
   )
 
