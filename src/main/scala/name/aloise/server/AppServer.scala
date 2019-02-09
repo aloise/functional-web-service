@@ -16,7 +16,8 @@ import scala.language.higherKinds
 
 object AppServer extends IOApp with Logging[IO] {
 
-  val blockingEc = ExecutionContext.fromExecutorService(Executors.newFixedThreadPool(4))
+  val blockingEcResource =
+    Resource.make(IO.delay(ExecutionContext.fromExecutorService(Executors.newFixedThreadPool(4))))(ec => IO.delay(ec.shutdown()))
 
   private val helloWorldService: HttpRoutes[IO] = HttpRoutes.of[IO] {
     case GET -> Root / name =>
@@ -28,20 +29,27 @@ object AppServer extends IOApp with Logging[IO] {
       Ok("Healthy Wealthy")
   }
 
-  private val faviconService = HttpRoutes.of[IO] {
+  private def faviconService(blockingEc: ExecutionContext) = HttpRoutes.of[IO] {
     case req @ GET -> Root / "favicon.ico" =>
       StaticFile.fromResource("/favicon/favicon-32x32.png", blockingEc, Some(req)).getOrElseF(NotFound())
   }
 
-  val routes: HttpRoutes[IO] = Router[IO](
+  def routes(blockingEc: ExecutionContext): HttpRoutes[IO] = Router[IO](
     "/hello" -> helloWorldService,
     "/health" -> healthService,
-    "/" -> faviconService
+    "/" -> faviconService(blockingEc)
   )
 
 
-  def run(args: List[String]): IO[ExitCode] =
-    new HttpServer(routes)().server.use { srv =>
+  def run(args: List[String]): IO[ExitCode] = {
+
+    val serverResource =
+      for {
+        blockingEC <- blockingEcResource
+        server <- HttpServer(routes(blockingEC))().server
+      } yield server
+
+    serverResource.use { srv =>
       for {
         _ <- log.info("Server is Running on " + srv.address)
         _ <- IO.delay(Console.println("Press a key to exit."))
@@ -49,5 +57,6 @@ object AppServer extends IOApp with Logging[IO] {
         _ <- log.info("Shutting Down on key press")
       } yield ExitCode.Success
     }
+  }
 
 }
