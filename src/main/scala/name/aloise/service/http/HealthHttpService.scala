@@ -1,15 +1,16 @@
 package name.aloise.service.http
 
-import cats.effect.{Async, Sync}
+import cats.effect.Async
 import io.circe.ObjectEncoder
-import org.http4s.HttpRoutes
+import io.circe.generic.semiauto.deriveEncoder
 import io.circe.syntax._
 import name.aloise.build.BuildInfo
-import HealthHttpService.Health
-import io.circe.generic.semiauto.deriveEncoder
+import name.aloise.service.http.HealthHttpService.Health
+import org.http4s.HttpRoutes
 
 
-case class HealthHttpService[F[_] : Async]() extends ApiHttpService[F]{
+case class HealthHttpService[F[_] : Async]() extends ApiHttpService[F] {
+
   import org.http4s.circe._
 
   private val healthResponse = Ok(Health(BuildInfo.name, BuildInfo.version, BuildInfo.revision).asJson)
@@ -21,8 +22,11 @@ case class HealthHttpService[F[_] : Async]() extends ApiHttpService[F]{
 }
 
 case object HealthHttpService {
+
   case class Health(service: String, version: String, revision: String, health: Boolean = true)
+
   case object Health {
     implicit val encoder: ObjectEncoder[Health] = deriveEncoder[Health]
   }
+
 }
