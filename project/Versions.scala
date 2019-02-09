@@ -5,5 +5,5 @@ object Versions {
   val frees = "0.8.2"
   val log4cats = "0.3.0-M2"
   val pureconfig = "0.10.2"
-  val tsecV = tsecV
+  val tsecV = "0.0.1-M11"
 }
