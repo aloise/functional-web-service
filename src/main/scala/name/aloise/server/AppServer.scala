@@ -11,37 +11,29 @@ import org.http4s.server.Router
 import scala.concurrent.ExecutionContext
 import cats.effect._
 import io.circe._
-import name.aloise.service.HealthService
+import name.aloise.service.http.{FaviconHttpService, HealthHttpService}
 import org.http4s._
 import org.http4s.dsl.io._
 
 object AppServer extends IOApp with Logging[IO] {
 
-  val blockingEcResource =
-    Resource.make(IO.delay(ExecutionContext.fromExecutorService(Executors.newFixedThreadPool(4))))(ec => IO.delay(ec.shutdown()))
-
-  private val helloWorldService: HttpRoutes[IO] = HttpRoutes.of[IO] {
-    case GET -> Root / name =>
-      Ok(s"Hello, ${name*19000}.")
-  }
-
-  private def faviconService(blockingEc: ExecutionContext) = HttpRoutes.of[IO] {
-    case req @ GET -> Root / "favicon.ico" =>
-      StaticFile.fromResource("/favicon/favicon-32x32.png", blockingEc, Some(req)).getOrElseF(NotFound())
-  }
-
-  def routes(blockingEc: ExecutionContext): HttpRoutes[IO] = Router[IO](
-    "/hello" -> helloWorldService,
-    "/health" -> HealthService[IO]().routes,
-    "/" -> faviconService(blockingEc)
+  def routes[F[_]: Async: ContextShift](blockingFilesAccessEC: ExecutionContext): HttpRoutes[F] = Router[F](
+    "/health" -> HealthHttpService[F]().routes,
+    "/" -> FaviconHttpService[F](blockingFilesAccessEC).routes
   )
 
-
   def run(args: List[String]): IO[ExitCode] = {
+
+    val blockingFilesAccessEC =
+      Resource.make(
+        IO.delay(ExecutionContext.fromExecutorService(Executors.newFixedThreadPool(Runtime.getRuntime.availableProcessors())))
+      )(ec => IO.delay(ec.shutdown()))
+
     val serverResource =
       for {
-        blockingEC <- blockingEcResource
-        server <- HttpServer(routes(blockingEC))().server
+        blockingEC <- blockingFilesAccessEC
+        allRoutes = routes[IO](blockingEC)
+        server <- HttpServer(allRoutes)().server
       } yield server
 
     serverResource.use { srv =>
