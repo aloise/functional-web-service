@@ -44,3 +44,10 @@ enablePlugins(JavaServerAppPackaging)
 enablePlugins(GraalVMNativeImagePlugin)
 
 graalVMNativeImageOptions ++= Seq("-da")
+
+lazy val root = (project in file("."))
+  .enablePlugins(BuildInfoPlugin)
+  .settings(
+    buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
+    buildInfoPackage := "name.aloise.build"
+  )

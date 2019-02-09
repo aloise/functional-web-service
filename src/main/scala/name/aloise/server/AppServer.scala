@@ -3,16 +3,15 @@ package name.aloise.server
 import java.util.concurrent.Executors
 
 import cats.effect._
-import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
+import name.aloise.utils.Logging
 import org.http4s._
 import org.http4s.dsl.io._
-import org.http4s.implicits._
-import org.http4s.server.{Router, Server}
-import cats.implicits._
-import name.aloise.utils.Logging
-
+import org.http4s.server.Router
 import scala.concurrent.ExecutionContext
-import scala.language.higherKinds
+import cats.effect._
+import io.circe._
+import org.http4s._
+import org.http4s.dsl.io._
 
 object AppServer extends IOApp with Logging[IO] {
 
@@ -42,7 +41,6 @@ object AppServer extends IOApp with Logging[IO] {
 
 
   def run(args: List[String]): IO[ExitCode] = {
-
     val serverResource =
       for {
         blockingEC <- blockingEcResource
@@ -52,8 +50,8 @@ object AppServer extends IOApp with Logging[IO] {
     serverResource.use { srv =>
       for {
         _ <- log.info("Server is Running on " + srv.address)
-        _ <- IO.delay(Console.println("Press a key to exit."))
-        _ <- IO.delay(scala.io.StdIn.readLine())
+        _ <- IO(Console.println("Press a key to exit."))
+        _ <- IO(scala.io.StdIn.readLine())
         _ <- log.info("Shutting Down on key press")
       } yield ExitCode.Success
     }
