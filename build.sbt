@@ -9,7 +9,8 @@ scalacOptions ++= Seq(
   "-feature",
   "-unchecked",
   "-Ypartial-unification",
-  "-Xfatal-warnings"
+  "-Xfatal-warnings",
+  "-language:higherKinds"
 )
 
 resolvers += Resolver.sonatypeRepo("releases")
@@ -25,7 +26,11 @@ libraryDependencies ++= Seq(
   "io.frees" %% "frees-logging" % Versions.frees,
   "io.chrisdavenport" %% "log4cats-core" % Versions.log4cats,
   "io.chrisdavenport" %% "log4cats-slf4j" % Versions.log4cats,
-  "com.github.pureconfig" %% "pureconfig" % Versions.pureconfig
+  "com.github.pureconfig" %% "pureconfig" % Versions.pureconfig,
+  "io.github.jmcardon" %% "tsec-common" % Versions.tsecV,
+  "io.github.jmcardon" %% "tsec-password" % Versions.tsecV,
+  "io.github.jmcardon" %% "tsec-cipher-jca" % Versions.tsecV,
+  "io.github.jmcardon" %% "tsec-cipher-bouncy" % Versions.tsecV,
 )
 
 

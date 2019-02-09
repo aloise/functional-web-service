@@ -9,27 +9,30 @@ import org.http4s.server.Server
 import io.chrisdavenport.log4cats.Logger
 import org.http4s.server.blaze.BlazeServerBuilder
 import cats.implicits._
+import name.aloise.utils.Logging
+
 import scala.language.higherKinds
 
-object AppServer extends IOApp {
-
-  implicit def unsafeLogger[F[_]: Sync] = Slf4jLogger.getLogger[F]
+object AppServer extends IOApp with Logging[IO] {
 
   private val helloWorldService = HttpRoutes.of[IO] {
     case GET -> Root / "hello" / name =>
-      Ok(s"Hello, ${name*1000}.")
-  }.orNotFound
+      Ok(s"Hello, ${name*19000}.")
+  }
 
-  private val server: Resource[IO, Server[IO]] = BlazeServerBuilder[IO]
-    .bindHttp(8080, "0.0.0.0")
-    .withHttpApp(helloWorldService)
-    .withNio2(true)
-    .resource
+  private val healthService = HttpRoutes.of[IO] {
+    case GET -> Root / "health" =>
+      Ok("Healthy Welathy")
+  }
 
   def run(args: List[String]): IO[ExitCode] =
-    server.use(src =>
-      Logger[IO].info("Server is Running on " + src.address) *>
-      IO.never
-    ).map(_ => ExitCode.Success)
+    new HttpServer(healthService.orNotFound)().server.use { srv =>
+      for {
+        _ <- log.info("Server is Running on " + srv.address)
+        _ <- IO.delay(Console.println("Press a key to exit."))
+        _ <- IO.delay(scala.io.StdIn.readLine())
+        _ <- log.info("Shutting Down on key press")
+      } yield ExitCode.Success
+    }
 
 }
