@@ -3,7 +3,7 @@ package name.aloise.server
 import java.util.concurrent.Executors
 
 import cats.effect._
-import name.aloise.service.http.{FaviconHttpService, HealthHttpService}
+import name.aloise.http.api.{FaviconHttpApi, HealthHttpApi}
 import name.aloise.utils.Logging
 import org.http4s._
 import org.http4s.server.Router
@@ -13,8 +13,8 @@ import scala.concurrent.ExecutionContext
 object AppServer extends IOApp with Logging[IO] {
 
   def routes[F[_] : Async : ContextShift](blockingFilesAccessEC: ExecutionContext): HttpRoutes[F] = Router[F](
-    "/health" -> HealthHttpService[F]().routes,
-    "/" -> FaviconHttpService[F](blockingFilesAccessEC).routes
+    "/health" -> HealthHttpApi[F]().routes,
+    "/" -> FaviconHttpApi[F](blockingFilesAccessEC).routes
   )
 
   def run(args: List[String]): IO[ExitCode] = {

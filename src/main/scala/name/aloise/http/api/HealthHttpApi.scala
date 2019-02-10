@@ -1,15 +1,15 @@
-package name.aloise.service.http
+package name.aloise.http.api
 
 import cats.effect.Async
 import io.circe.ObjectEncoder
 import io.circe.generic.semiauto.deriveEncoder
 import io.circe.syntax._
 import name.aloise.build.BuildInfo
-import name.aloise.service.http.HealthHttpService.Health
+import name.aloise.http.api.HealthHttpApi.Health
 import org.http4s.HttpRoutes
 
 
-case class HealthHttpService[F[_] : Async]() extends ApiHttpService[F] {
+case class HealthHttpApi[F[_] : Async]() extends HttpApi[F] {
 
   import org.http4s.circe._
 
@@ -21,7 +21,7 @@ case class HealthHttpService[F[_] : Async]() extends ApiHttpService[F] {
   }
 }
 
-case object HealthHttpService {
+case object HealthHttpApi {
 
   case class Health(service: String, version: String, revision: String, health: Boolean = true)
 

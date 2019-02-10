@@ -10,43 +10,31 @@ scalacOptions ++= Seq(
   "-unchecked",
   "-Ypartial-unification",
   "-Xfatal-warnings",
-  "-language:higherKinds"
+  "-language:higherKinds",
+  "-Xplugin-require:macroparadise"
 )
 
 resolvers += Resolver.sonatypeRepo("releases")
 
-libraryDependencies ++= Seq(
-  "org.http4s" %% "http4s-blaze-server" % Versions.http4s,
-  "org.http4s" %% "http4s-dsl" % Versions.http4s,
-  "org.http4s" %% "http4s-circe" % Versions.http4s,
-  "io.circe" %% "circe-generic" % Versions.circe,
-  "org.tpolecat" %% "doobie-core" % Versions.doobie,
-  "org.tpolecat" %% "doobie-hikari" % Versions.doobie,
-  "io.frees" %% "frees-http4s" % Versions.frees,
-  "io.frees" %% "frees-logging" % Versions.frees,
-  "io.chrisdavenport" %% "log4cats-core" % Versions.log4cats,
-  "io.chrisdavenport" %% "log4cats-slf4j" % Versions.log4cats,
-  "com.github.pureconfig" %% "pureconfig" % Versions.pureconfig,
-  "io.github.jmcardon" %% "tsec-common" % Versions.tsecV,
-  "io.github.jmcardon" %% "tsec-password" % Versions.tsecV,
-  "io.github.jmcardon" %% "tsec-cipher-jca" % Versions.tsecV,
-  "io.github.jmcardon" %% "tsec-cipher-bouncy" % Versions.tsecV,
+lazy val models = (project in file("modules/models")).settings(
+  libraryDependencies := Dependencies.Common
 )
 
-addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.8")
-
-// if your project uses multiple Scala versions, use this for cross building
-addCompilerPlugin("org.spire-math" % "kind-projector" % "0.9.8" cross CrossVersion.binary)
-
-enablePlugins(JavaServerAppPackaging)
-enablePlugins(GraalVMNativeImagePlugin)
-
-graalVMNativeImageOptions ++= Seq("-da")
+lazy val services = (project in file("modules/services"))
+  .dependsOn(models)
+  .settings(
+    libraryDependencies := Dependencies.Services
+  )
 
 lazy val root = (project in file("."))
-  .enablePlugins(BuildInfoPlugin)
+  .enablePlugins(BuildInfoPlugin, JavaServerAppPackaging, GraalVMNativeImagePlugin)
+  .dependsOn(services)
   .settings(
+    graalVMNativeImageOptions ++= Seq("-da"),
+    libraryDependencies ++= Dependencies.Server,
     buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion, "revision" -> scala.sys.process.Process("git rev-parse HEAD").!!.trim),
     buildInfoPackage := "name.aloise.build"
   )
 
+addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.8")
+addCompilerPlugin("org.scalameta" % "paradise" % "3.0.0-M11" cross CrossVersion.full)
