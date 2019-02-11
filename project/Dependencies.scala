@@ -3,12 +3,12 @@ import sbt._
 object Dependencies {
 
   val Common = Seq[ModuleID](
-    "io.frees" %% "frees-core" % Versions.frees,
     "org.typelevel" %% "cats-core" % Versions.cats,
     "org.typelevel" %% "cats-free" % Versions.cats,
     "org.typelevel" %% "cats-effect" % Versions.catsEffects,
     "eu.timepit" %% "refined" % Versions.refined,
-    "eu.timepit" %% "refined-cats" % Versions.refined
+    "eu.timepit" %% "refined-cats" % Versions.refined,
+    "org.typelevel" %% "cats-tagless-macros" % Versions.catsTagless
   )
 
   val Server = Common ++ Seq[ModuleID](
@@ -19,8 +19,6 @@ object Dependencies {
     "io.circe" %% "circe-refined" % Versions.circe,
     "org.tpolecat" %% "doobie-core" % Versions.doobie,
     "org.tpolecat" %% "doobie-hikari" % Versions.doobie,
-    "io.frees" %% "frees-http4s" % Versions.frees,
-    "io.frees" %% "frees-logging" % Versions.frees,
     "io.chrisdavenport" %% "log4cats-core" % Versions.log4cats,
     "io.chrisdavenport" %% "log4cats-slf4j" % Versions.log4cats,
     "com.github.pureconfig" %% "pureconfig" % Versions.pureconfig,

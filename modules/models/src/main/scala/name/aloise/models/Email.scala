@@ -15,7 +15,7 @@ object MatchesEmail {
   implicit val emailValidate: Validate[String, MatchesEmail] =
     Validate.fromPredicate(
       str => regex.matcher(str).matches(),
-      str => s"$str is not a valie email",
+      str => s"$str is not a value email",
       MatchesEmail()
     )
 }
