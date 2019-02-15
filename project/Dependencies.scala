@@ -17,16 +17,24 @@ object Dependencies {
     "org.http4s" %% "http4s-circe" % Versions.http4s,
     "io.circe" %% "circe-generic" % Versions.circe,
     "io.circe" %% "circe-refined" % Versions.circe,
-    "org.tpolecat" %% "doobie-core" % Versions.doobie,
-    "org.tpolecat" %% "doobie-hikari" % Versions.doobie,
     "io.chrisdavenport" %% "log4cats-core" % Versions.log4cats,
     "io.chrisdavenport" %% "log4cats-slf4j" % Versions.log4cats,
     "com.github.pureconfig" %% "pureconfig" % Versions.pureconfig,
+    "com.github.pureconfig" %% "pureconfig-cats-effect" % Versions.pureconfig,
     "io.github.jmcardon" %% "tsec-common" % Versions.tsecV,
     "io.github.jmcardon" %% "tsec-password" % Versions.tsecV,
     "io.github.jmcardon" %% "tsec-cipher-jca" % Versions.tsecV,
     "io.github.jmcardon" %% "tsec-cipher-bouncy" % Versions.tsecV,
     "eu.timepit" %% "refined-pureconfig" % Versions.refined
+
+  )
+
+  val DB = Common ++ Seq[ModuleID](
+    "org.tpolecat" %% "doobie-core" % Versions.doobie,
+    // And add any of these as needed
+    // "org.tpolecat" %% "doobie-h2"        % Versions.doobie,          // H2 driver 1.4.197 + type mappings.
+    "org.tpolecat" %% "doobie-hikari"    % Versions.doobie,          // HikariCP transactor.
+    "org.tpolecat" %% "doobie-postgres"  % Versions.doobie
   )
 
   val Services = Common

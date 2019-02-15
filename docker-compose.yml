@@ -1,0 +1,11 @@
+version: '3'
+services:
+  localdb:
+    image: postgres
+    ports:
+      - 5432:5432
+    environment:
+      - DB_USER=username
+      - DB_PASS=password
+      - DB_NAME=database
+

@@ -1,12 +1,14 @@
 package name.aloise.server
 
 import java.util.concurrent.Executors
-
+import pureconfig.generic.auto._
 import cats.effect._
+import name.aloise.db.connector.{DatabaseConnector, DatabaseConnectorConfiguration}
 import name.aloise.http.api.{FaviconHttpApi, HealthHttpApi}
 import name.aloise.utils.Logging
 import org.http4s._
 import org.http4s.server.Router
+import pureconfig.module.catseffect._
 
 import scala.concurrent.ExecutionContext
 
@@ -19,6 +21,8 @@ object AppServer extends IOApp with Logging[IO] {
 
   def run(args: List[String]): IO[ExitCode] = {
 
+    val dbConfig = loadConfigF[IO,DatabaseConnectorConfiguration]("db.configuration")
+
     val blockingFilesAccessEC =
       Resource.make(
         IO.delay(ExecutionContext.fromExecutorService(Executors.newFixedThreadPool(Runtime.getRuntime.availableProcessors())))
@@ -28,6 +32,7 @@ object AppServer extends IOApp with Logging[IO] {
       for {
         blockingEC <- blockingFilesAccessEC
         allRoutes = routes[IO](blockingEC)
+        db <- DatabaseConnector.open(dbConfig)
         server <- HttpServer(allRoutes)().server
       } yield server
 
