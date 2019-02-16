@@ -2,11 +2,12 @@ package name.aloise.db.connector
 import cats.effect.{Async, ContextShift, Resource}
 import doobie.hikari.HikariTransactor
 import doobie.util.ExecutionContexts
+import doobie.util.transactor.Transactor
 
 trait DatabaseConnector {
-  def open[F[_] : Async : ContextShift](configurationF: F[DatabaseConnectorConfiguration]): Resource[F, HikariTransactor[F]] =
+  def open[F[_] : Async : ContextShift](configurationF: DatabaseConnectorConfiguration): Resource[F, Transactor[F]] =
     for {
-      configuration <- Resource.liftF(configurationF)
+      configuration <- Resource.pure(configurationF)
       connectionEC <- ExecutionContexts.fixedThreadPool[F](configuration.connectionPoolSize) // our connect EC
       transactionEC <- ExecutionContexts.cachedThreadPool[F]    // our transaction TE
       hikariTransactor <- HikariTransactor.newHikariTransactor[F](

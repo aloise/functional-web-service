@@ -1,11 +1,10 @@
 package name.aloise.models
 
 
-trait Id[OBJ] {
-  def value: Long
+trait Id[OBJ, X <: Id[OBJ, X]] { self: X =>
+  def value: Int
 }
 
-trait WithId[OBJ] {
-  self: OBJ =>
-  def id: Id[OBJ]
+trait WithId[OBJ, X <: Id[OBJ, X]] { self: OBJ =>
+  def id: X
 }

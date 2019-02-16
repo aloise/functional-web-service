@@ -1,11 +1,13 @@
 version: '3'
 services:
   localdb:
-    image: postgres
+    image: postgres:11.2
     ports:
       - 5432:5432
     environment:
-      - DB_USER=username
-      - DB_PASS=password
-      - DB_NAME=database
+      - POSTGRES_USER=username
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=database
+    volumes:
+      - ./src/main/resources/db/data.sql:/docker-entrypoint-initdb.d/init.sql
 

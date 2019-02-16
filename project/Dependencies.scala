@@ -34,7 +34,8 @@ object Dependencies {
     // And add any of these as needed
     // "org.tpolecat" %% "doobie-h2"        % Versions.doobie,          // H2 driver 1.4.197 + type mappings.
     "org.tpolecat" %% "doobie-hikari"    % Versions.doobie,          // HikariCP transactor.
-    "org.tpolecat" %% "doobie-postgres"  % Versions.doobie
+    "org.tpolecat" %% "doobie-postgres"  % Versions.doobie,
+    "org.tpolecat" %% "doobie-refined"  % Versions.doobie
   )
 
   val Services = Common
