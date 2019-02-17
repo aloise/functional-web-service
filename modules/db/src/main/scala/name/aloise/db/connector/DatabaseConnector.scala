@@ -5,7 +5,7 @@ import doobie.util.ExecutionContexts
 import doobie.util.transactor.Transactor
 
 trait DatabaseConnector {
-  def open[F[_] : Async : ContextShift](configurationF: DatabaseConnectorConfiguration): Resource[F, Transactor[F]] =
+  def open[F[_] : Async : ContextShift](configurationF: DatabaseConfiguration): Resource[F, Transactor[F]] =
     for {
       configuration <- Resource.pure(configurationF)
       connectionEC <- ExecutionContexts.fixedThreadPool[F](configuration.connectionPoolSize) // our connect EC
@@ -29,7 +29,7 @@ trait DatabaseConnector {
 
 object DatabaseConnector extends DatabaseConnector
 
-case class DatabaseConnectorConfiguration(
+case class DatabaseConfiguration(
   jdbcURL: String, // jdbc:postgresql://host/database
   driverClassName: String, // "org.postgresql.Driver"
   user: String,

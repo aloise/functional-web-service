@@ -1,14 +1,14 @@
 package name.aloise.server
 
 import cats.effect._
-import name.aloise.db.connector.DatabaseConnectorConfiguration
+import name.aloise.db.connector.DatabaseConfiguration
 import name.aloise.utils.Logging
 import pureconfig.module.catseffect._
 
 object AppServer extends AbstractAppServer[IO] with IOApp with Logging[IO] {
   import pureconfig.generic.auto._
 
-  private val dbConfig = Resource.liftF(loadConfigF[IO, DatabaseConnectorConfiguration]("db.configuration"))
+  private val dbConfig = Resource.liftF(loadConfigF[IO, DatabaseConfiguration]("db.configuration"))
   private val httpConfig = HttpServerConfiguration()
 
   def run(args: List[String]): IO[ExitCode] = {

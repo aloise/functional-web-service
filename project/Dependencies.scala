@@ -8,7 +8,8 @@ object Dependencies {
     "org.typelevel" %% "cats-effect" % Versions.catsEffects,
     "eu.timepit" %% "refined" % Versions.refined,
     "eu.timepit" %% "refined-cats" % Versions.refined,
-    "org.typelevel" %% "cats-tagless-macros" % Versions.catsTagless
+    "org.typelevel" %% "cats-tagless-macros" % Versions.catsTagless,
+    "org.slf4j" % "slf4j-simple" % "1.7.21"
   )
 
   val Server = Common ++ Seq[ModuleID](
@@ -17,7 +18,8 @@ object Dependencies {
     "org.http4s" %% "http4s-circe" % Versions.http4s,
     "io.circe" %% "circe-generic" % Versions.circe,
     "io.circe" %% "circe-refined" % Versions.circe,
-    "io.chrisdavenport" %% "log4cats-core" % Versions.log4cats,
+    "io.circe" %% "circe-generic-extras" % Versions.circe,
+      "io.chrisdavenport" %% "log4cats-core" % Versions.log4cats,
     "io.chrisdavenport" %% "log4cats-slf4j" % Versions.log4cats,
     "com.github.pureconfig" %% "pureconfig" % Versions.pureconfig,
     "com.github.pureconfig" %% "pureconfig-cats-effect" % Versions.pureconfig,

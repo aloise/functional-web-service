@@ -2,8 +2,10 @@ package name.aloise.server
 import java.util.concurrent.Executors
 
 import cats.effect._
-import name.aloise.db.connector.{DatabaseConnector, DatabaseConnectorConfiguration}
+import cats.effect.concurrent.Ref
+import name.aloise.db.connector.{DatabaseConfiguration, DatabaseConnector}
 import name.aloise.http.api.{FaviconHttpApi, HealthHttpApi, UserHttpApi}
+import name.aloise.models.UserId
 import name.aloise.service.UserService
 import org.http4s.HttpRoutes
 import org.http4s.server.{Router, Server}
@@ -30,7 +32,7 @@ abstract class AbstractAppServer[F[_]: Async] {
       )
     )(ec => implicitly[Sync[F]].delay(ec.shutdown()))
 
-  private def getUserService(dbConfig: DatabaseConnectorConfiguration)(
+  private def getDoobieUserService(dbConfig: DatabaseConfiguration)(
       implicit CF: ContextShift[F]): Resource[F, UserService[F]] =
     for {
       transactor <- DatabaseConnector.open(dbConfig)
@@ -39,11 +41,13 @@ abstract class AbstractAppServer[F[_]: Async] {
 
   protected def serverResource(
       httpConfig: HttpServerConfiguration,
-      dbConfig: DatabaseConnectorConfiguration)(
+      dbConfig: DatabaseConfiguration)(
       implicit CF: ContextShift[F], T: Timer[F], CE: ConcurrentEffect[F]): Resource[F, Server[F]] =
     for {
       blockingEC   <- blockingFilesAccessEC
-      userServices <- getUserService(dbConfig)
+      // userServices <- getDoobieUserService(dbConfig)
+      userRef <- Resource.liftF(Ref.of[F, Map[UserId, UserService.UserRecord]](Map.empty))
+      userServices = UserService.userServiceMemoryImpl[F](userRef)
       allRoutes = routes(userServices)(blockingEC)
       server <- HttpServer(allRoutes)(httpConfig).server
     } yield server

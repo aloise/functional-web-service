@@ -4,8 +4,8 @@
             <pattern>%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n</pattern>
         </encoder>
     </appender>
-    <logger name="org.http4s" level="warn" />
-    <root level="debug">
+    <!-- <logger name="org.http4s" level="warn" /> -->
+    <root level="DEBUG">
         <appender-ref ref="STDOUT" />
     </root>
 </configuration>

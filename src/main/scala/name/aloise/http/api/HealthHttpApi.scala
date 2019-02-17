@@ -23,7 +23,7 @@ case class HealthHttpApi[F[_] : Async]() extends HttpApi[F] {
 
 case object HealthHttpApi {
 
-  case class Health(service: String, version: String, revision: String, health: Boolean = true)
+  case class Health(service: String, version: String, revision: String, healthy: Boolean = true)
 
   case object Health {
     implicit val encoder: ObjectEncoder[Health] = deriveEncoder[Health]
