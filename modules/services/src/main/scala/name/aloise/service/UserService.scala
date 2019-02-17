@@ -16,7 +16,7 @@ import scala.util.Random
 trait UserService[F[_]] {
   def login(email: Email, password: Password): F[Option[User]]
   def create(user: UserDraft): F[User]
-  def remove(userId: UserId): F[Unit]
+  def remove(userId: UserId): F[Boolean]
   def update(user: User): F[UserId]
   def get(userId: UserId): F[Option[User]]
   def insertRandom(email: Long => String): F[User]
@@ -44,6 +44,15 @@ trait DoobieUserService extends DoobieServiceHelper {
 
         def create(email: Email, password: Password) =
           sql"INSERT INTO users(email, password) VALUES (${email.value}, crypt(${password.value}, gen_salt('bf')))".update
+
+        def remove(id: UserId) =
+          sql"DELETE FROM users WHERE id = ${id.value}".update
+
+        def updateEmail(userId: UserId, email: Email) =
+          sql"UPDATE users SET email = ${email.value} WHERE id = ${userId.value}".update
+
+        def updatePassword(userId: UserId, password: Password) =
+          sql"UPDATE users SET password = crypt(${password.value}, gen_salt('bf'))) WHERE id = ${userId.value}".update
       }
 
       override def login(email: Email, password: Password): F[Option[User]] =
@@ -60,8 +69,10 @@ trait DoobieUserService extends DoobieServiceHelper {
       override def get(userId: UserId): F[Option[User]] =
         Transactions.get(userId).option.transact(transactor)
 
-      override def remove(userId: UserId): F[Unit] = ???
-      override def update(user: User): F[UserId]   = ???
+      override def remove(userId: UserId): F[Boolean] =
+        Transactions.remove(userId).run.map(_>0).transact(transactor)
+
+      override def update(user: User): F[UserId] = ???
 
       def insertRandom(emailGen: Long => String): F[User] = {
         val rnd          = Random.nextLong()
@@ -95,7 +106,13 @@ trait DoobieUserService extends DoobieServiceHelper {
 
       } yield user
 
-    override def remove(userId: UserId): F[Unit] = ???
+    override def remove(userId: UserId): F[Boolean] =
+      for {
+        users <- usersRef.get
+        exists = users.contains(userId)
+        _ <- usersRef.set(users - userId)
+      } yield exists
+
     override def update(user: User): F[UserId] = ???
     override def get(userId: UserId): F[Option[User]] =
       for {
