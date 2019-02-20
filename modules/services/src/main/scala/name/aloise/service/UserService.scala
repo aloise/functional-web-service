@@ -17,7 +17,8 @@ trait UserService[F[_]] {
   def login(email: Email, password: Password): F[Option[User]]
   def create(user: UserDraft): F[User]
   def remove(userId: UserId): F[Boolean]
-  def update(user: User): F[UserId]
+  def update(user: User): F[Boolean]
+  def updatePassword(userId: UserId, password: Password): F[Boolean]
   def get(userId: UserId): F[Option[User]]
   def insertRandom(email: Long => String): F[User]
 }
@@ -72,7 +73,11 @@ trait DoobieUserService extends DoobieServiceHelper {
       override def remove(userId: UserId): F[Boolean] =
         Transactions.remove(userId).run.map(_>0).transact(transactor)
 
-      override def update(user: User): F[UserId] = ???
+      override def updatePassword(userId: UserId, password: Password): F[Boolean] =
+        Transactions.updatePassword(userId, password).run.map(_>0).transact(transactor)
+
+      override def update(user: User): F[Boolean] =
+        Transactions.updateEmail(user.id, user.email).run.map(_>0).transact(transactor)
 
       def insertRandom(emailGen: Long => String): F[User] = {
         val rnd          = Random.nextLong()
@@ -113,11 +118,24 @@ trait DoobieUserService extends DoobieServiceHelper {
         _ <- usersRef.set(users - userId)
       } yield exists
 
-    override def update(user: User): F[UserId] = ???
+    override def update(user: User): F[Boolean] =
+      for {
+        users <- usersRef.get
+        existing = users.get(user.id)
+        _ <- existing.map(rec => usersRef.set(users + (user.id -> rec.copy(user = user)))).getOrElse(implicitly[Sync[F]].unit)
+      } yield existing.nonEmpty
+
     override def get(userId: UserId): F[Option[User]] =
       for {
         users <- usersRef.get
       } yield users.get(userId).map(_.user)
+
+    override def updatePassword(userId: UserId, password: Password): F[Boolean] =
+      for {
+        users <- usersRef.get
+        existing = users.get(userId)
+        _ <- existing.map(rec => usersRef.set(users + (userId -> rec.copy(password = password)))).getOrElse(implicitly[Sync[F]].unit)
+      } yield existing.nonEmpty
 
     def insertRandom(emailGen: Long => String): F[User] = {
       val rnd          = Random.nextLong()
