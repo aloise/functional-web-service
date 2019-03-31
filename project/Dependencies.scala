@@ -27,8 +27,8 @@ object Dependencies {
     "io.github.jmcardon" %% "tsec-password" % Versions.tsecV,
     "io.github.jmcardon" %% "tsec-cipher-jca" % Versions.tsecV,
     "io.github.jmcardon" %% "tsec-cipher-bouncy" % Versions.tsecV,
-    "eu.timepit" %% "refined-pureconfig" % Versions.refined
-
+    "eu.timepit" %% "refined-pureconfig" % Versions.refined,
+    "com.github.vladimir-bukhtoyarov" % "bucket4j-core" % Versions.bucket4j
   )
 
   val DB = Common ++ Seq[ModuleID](

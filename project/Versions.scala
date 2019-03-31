@@ -9,4 +9,5 @@ object Versions {
   val catsEffects = "1.2.0"
   val refined = "0.9.4"
   val catsTagless = "0.1.0"
+  val bucket4j = "4.3.0"
 }

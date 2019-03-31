@@ -17,6 +17,10 @@ scalacOptions in (Compile, console) ~= (_ filterNot (_ contains "paradise"))
 
 resolvers += Resolver.sonatypeRepo("releases")
 
+lazy val common = (project in file("modules/common")).settings(
+  libraryDependencies := Dependencies.Common
+)
+
 lazy val db = (project in file("modules/db")).settings(
   libraryDependencies := Dependencies.DB
 )
@@ -26,7 +30,7 @@ lazy val models = (project in file("modules/models")).settings(
 )
 
 lazy val services = (project in file("modules/services"))
-  .dependsOn(models, db)
+  .dependsOn(common, models, db)
   .settings(
     libraryDependencies := Dependencies.Services
   )
