@@ -4,12 +4,12 @@ trait Dep[A] { self =>
 
   type Requires
 
-  def provide(d: Requires): A
+  def run(d: Requires): A
 
-  def map[B](f: A => B): Dep[B] = new Dep[B]{ x =>
+  def map[B](f: A => B): Dep.Aux[Requires, B] = new Dep[B]{ x =>
     override type Requires = self.Requires
 
-    override def provide(d: Requires): B = f(self.provide(d))
+    override def run(d: Requires): B = f(self.run(d))
   }
 
   def flatMap[B, Req2, BothReq](f: A => Dep.Aux[Req2, B])
@@ -17,9 +17,9 @@ trait Dep[A] { self =>
 
     override type Requires = BothReq
 
-    override def provide(d: BothReq): B = {
+    override def run(d: BothReq): B = {
       val (d0, d1) = merger.split(d)
-      f(self.provide(d0)).provide(d1)
+      f(self.run(d0)).run(d1)
     }
   }
 }
@@ -61,6 +61,31 @@ object Merger {
 
 
 object Dep {
-  type Aux[Req0, A0] = Dep[A0]{ type Requires = Req0}
+
+  import shapeless._
+
+  type Aux[+Req0, A0] = Dep[A0]{ type Requires = Req0 }
+
+  def pure[A](value: A): Dep.Aux[HList, A] = new Dep[A] {
+    type Requires = HNil
+
+    override def run(d: HNil): A = value
+  }
+
+  def reader[Env, A](f: Env => A): Dep.Aux[HList, A] = new Dep[A] {
+    type Requires = Env :: HNil
+
+    override def run(d: Requires): A = f(d.head)
+  }
+
+
+  val test: Dep.Aux[HNil, Int] = for {
+    c <- reader((name:String) => name.length)
+    a <- pure(1)
+    b <- pure(2)
+    //
+  } yield a+b+1
+
+  test.run(HNil)
 
 }
