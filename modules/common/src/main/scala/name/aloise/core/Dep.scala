@@ -1,5 +1,7 @@
 package name.aloise.core
 
+import shapeless.ops.hlist.Prepend
+
 trait Dep[A] { self =>
 
   type Requires
@@ -31,14 +33,27 @@ trait Merger[D0, D1] {
 
   type Out
 
-  def merge(dep1: D0, dep2: D1): Merger[D0, D1]
+  def merge(dep1: D0, dep2: D1): Out
 
   def split: (D0, D1)
 
 }
 
 object Merger {
+
+
   type Aux[D0, D1, Out2] = Merger[D0, D1]{ type Out = Out2}
+
+  import shapeless.HList
+
+  implicit def implicitHListMerger[D0 <: HList, D1 <: HList, Result <: HList](implicit prepend: Prepend.Aux[D0, D1, Result]): Merger.Aux[D0, D1, Result] = new Merger[D0, D1] {
+    override type Out = Result
+
+    override def merge(dep1: D0, dep2: D1): Out = prepend(dep1, dep2)
+
+    override def split: (D0, D1) = ???
+  }
+
 }
 
 
